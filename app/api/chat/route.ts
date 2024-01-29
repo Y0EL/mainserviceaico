@@ -6,9 +6,7 @@ import {
   StreamingTextResponse,
 } from "ai";
 import { functions, runFunction } from "./functions";
-import { ChatCompletionChunk } from 'path-to-openai-library';
 
-// Create an OpenAI API client (that's edge friendly!)
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -43,24 +41,23 @@ export async function POST(req: Request) {
     }
   }
 
-  const reqBody = await req.json();
-  const userMessages = reqBody.messages || [];
+  const { messages } = await req.json();
 
-  // Adding a system message
+  // Menambahkan pesan sistem
   const systemMessage = {
     role: "system",
     content: "Kamu adalah AICO, asisten virtual berbahasa Indonesia yang bertugas membantu mengembangkan konten TikTok untuk influencer besar. Sekarang, Lakukan riset diinternet sebelum memberikan penilaian'. Kamu bisa ngasih insight tentang tren, statistik audiens, dan topik populer berdasarkan data tersebut. Tugas-tugas kamu termasuk:\n\n- Menilai skrip video TikTok dan memberikan hanya penilaian.\n\n1. Judul: [Judul yang menarik berdasarkan tren]\n2. Skor Potensi Viral: [Berdasarkan data dan analisis]\n3. Estimasi Jumlah Suka: [Berdasarkan tren dan data]\n\nKarakter kamu bergaya 'Saya' dan 'kamu', dengan kepribadian INFJ dan zodiak Gemini. Moto kamu 'Artificial Intelligence for Creative Opportunities', menekankan penggunaan AI untuk membuka peluang baru di industri kreatif. Setelah kamu sudah memberikan semuannya pastikan kamu memberikan saran untuk improve konten yang sekiranya cocok dan pas untuk audiens pada konteks wkwkk. Untuk skor potensi viral, estimasi jumlah suka gausah pake alasan, cukup kasih angka saja. tugas kamu hanya penganalisa saja!"
   };
 
   const initialResponse = await openai.chat.completions.create({
-    model: "gpt-4-0125-preview", // Updated model
-    messages: [systemMessage, ...userMessages],
+    model: "gpt-4-0125-preview", // Model yang diupdate
+    messages: [systemMessage, ...messages],
     stream: true,
     functions,
     function_call: "auto",
   });
 
-  const stream = OpenAIStream(initialResponse as unknown as AsyncIterable<ChatCompletionChunk>, {
+  const stream = OpenAIStream(initialResponse, {
     experimental_onFunctionCall: async (
       { name, arguments: args },
       createFunctionCallMessages,
@@ -68,9 +65,9 @@ export async function POST(req: Request) {
       const result = await runFunction(name, args);
       const newMessages = createFunctionCallMessages(result);
       return openai.chat.completions.create({
-        model: "gpt-4-0125-preview", // Updated model
+        model: "gpt-4-0125-preview", // Model yang diupdate
         stream: true,
-        messages: [...userMessages, ...newMessages],
+        messages: [...messages, ...newMessages],
       });
     },
   });
