@@ -6,6 +6,7 @@ import {
   StreamingTextResponse,
 } from "ai";
 import { functions, runFunction } from "./functions";
+import { ChatCompletionChunk } from 'path-to-openai-library';
 
 // Create an OpenAI API client (that's edge friendly!)
 const openai = new OpenAI({
