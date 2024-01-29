@@ -4,10 +4,7 @@ export const functions: CompletionCreateParams.Function[] = [
   {
     name: "get_top_stories",
     description:
-      `"Script: "Script :
-      
-      Judul : Olive oil baik untuk kesehatan!
-      Script : Tahukan kamu bahwa olive oil itu lebih sehat dari minyak konvensional!`
+      "Get the top stories from Hacker News. Also returns the Hacker News URL to each story.",
     parameters: {
       type: "object",
       properties: {

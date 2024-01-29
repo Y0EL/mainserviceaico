@@ -12,11 +12,6 @@ import Textarea from "react-textarea-autosize";
 import { toast } from "sonner";
 
 const examples = [
-  `Script :
-  \nJudul : Olive oil baik untuk kesehatan! 
-  \nScript : Tahukan kamu bahwa olive oil itu lebih sehat dari minyak konvensional!`,
-  "Rekomendasikan saya Script TikTok.",
-  "Script TikTok paling viral di Tahun ini!",
 ];
 
 export default function Chat() {
@@ -71,13 +66,12 @@ export default function Chat() {
             )}
           >
             <div className="flex w-full max-w-screen-md items-start space-x-4 px-5 sm:px-0">
-               <div
+              <div
                 className={clsx(
-                 "p-1.5 text-white",
-                 message.role === "assistant" ? "bg-green-500" : "bg-black",
-                 )}
-                  >
-                <img src="aico.svg" alt="Ikon" />
+                  "p-1.5 text-white",
+                  message.role === "assistant" ? "bg-green-500" : "bg-black",
+                )}
+              >
                 {message.role === "user" ? (
                   <User width={20} />
                 ) : (
