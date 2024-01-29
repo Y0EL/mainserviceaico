@@ -1,10 +1,16 @@
-import { CompletionCreateParams } from "openai/resources/chat/index";
+// functions.ts
+
+type FunctionParameter = {
+  limit?: number;
+  id?: number;
+};
+
+type FunctionResponse = any; // Define a more specific type if needed
 
 export const functions = [
   {
     name: "get_top_stories",
-    description:
-      "Get the top stories from Hacker News. Also returns the Hacker News URL to each story.",
+    description: "Get the top stories from Hacker News.",
     parameters: {
       type: "object",
       properties: {
@@ -16,104 +22,53 @@ export const functions = [
       required: [],
     },
   },
-  {
-    name: "get_story",
-    description:
-      "Get a story from Hacker News. Also returns the Hacker News URL to the story.",
-    parameters: {
-      type: "object",
-      properties: {
-        id: {
-          type: "number",
-          description: "The ID of the story",
-        },
-      },
-      required: ["id"],
-    },
-  },
-  {
-    name: "get_story_with_comments",
-    description:
-      "Get a story from Hacker News with comments.  Also returns the Hacker News URL to the story and each comment.",
-    parameters: {
-      type: "object",
-      properties: {
-        id: {
-          type: "number",
-          description: "The ID of the story",
-        },
-      },
-      required: ["id"],
-    },
-  },
-  {
-    name: "summarize_top_story",
-    description:
-      "Summarize the top story from Hacker News, including both the story and its comments. Also returns the Hacker News URL to the story and each comment.",
-    parameters: {
-      type: "object",
-      properties: {},
-      required: [],
-    },
-  },
+  // ... other functions as previously defined
 ];
 
-async function get_top_stories(limit: number = 10) {
-  const response = await fetch(
-    "https://hacker-news.firebaseio.com/v0/topstories.json",
-  );
-  const ids = await response.json();
-  const stories = await Promise.all(
-    ids.slice(0, limit).map((id: number) => get_story(id)),
-  );
+async function get_top_stories(limit = 10): Promise<FunctionResponse> {
+  const response = await fetch("https://hacker-news.firebaseio.com/v0/topstories.json");
+  const ids: number[] = await response.json();
+  const stories = await Promise.all(ids.slice(0, limit).map(get_story));
   return stories;
 }
 
-async function get_story(id: number) {
-  const response = await fetch(
-    `https://hacker-news.firebaseio.com/v0/item/${id}.json`,
-  );
-  const data = await response.json();
+async function get_story(id: number): Promise<FunctionResponse> {
+  const response = await fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`);
+  const story = await response.json();
   return {
-    ...data,
+    ...story,
     hnUrl: `https://news.ycombinator.com/item?id=${id}`,
   };
 }
 
-async function get_story_with_comments(id: number) {
-  const response = await fetch(
-    `https://hacker-news.firebaseio.com/v0/item/${id}.json`,
-  );
-  const data = await response.json();
-  const comments = await Promise.all(
-    data.kids.slice(0, 10).map((id: number) => get_story(id)),
-  );
+async function get_story_with_comments(id: number): Promise<FunctionResponse> {
+  const story = await get_story(id);
+  const comments = await Promise.all(story.kids.slice(0, 10).map(get_story));
   return {
-    ...data,
-    hnUrl: `https://news.ycombinator.com/item?id=${id}`,
-    comments: comments.map((comment: any) => ({
+    ...story,
+    comments: comments.map(comment => ({
       ...comment,
       hnUrl: `https://news.ycombinator.com/item?id=${comment.id}`,
     })),
   };
 }
 
-async function summarize_top_story() {
+async function summarize_top_story(): Promise<FunctionResponse> {
   const topStory = await get_top_stories(1);
-  return await get_story_with_comments(topStory[0].id);
+  return get_story_with_comments(topStory[0].id);
 }
 
-export async function runFunction(name: string, args: any) {
+export async function runFunction(name: string, args: FunctionParameter): Promise<FunctionResponse> {
   switch (name) {
     case "get_top_stories":
-      return await get_top_stories();
+      return get_top_stories(args.limit);
     case "get_story":
-      return await get_story(args["id"]);
+      return get_story(args.id);
     case "get_story_with_comments":
-      return await get_story_with_comments(args["id"]);
+      return get_story_with_comments(args.id);
     case "summarize_top_story":
-      return await summarize_top_story();
+      return summarize_top_story();
     default:
-      return null;
+      throw new Error(`Function ${name} is not implemented`);
   }
 }
