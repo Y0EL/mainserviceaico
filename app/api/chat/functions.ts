@@ -1,6 +1,6 @@
-import { CompletionCreateParams } from "openai/resources/chat/index";
+iimport fetch from 'node-fetch';
 
-export const functions: CompletionCreateParams.Function[] = [
+export const functions = [
   {
     name: "get_top_stories",
     description:
@@ -58,7 +58,7 @@ export const functions: CompletionCreateParams.Function[] = [
   },
 ];
 
-async function get_top_stories(limit: number = 10) {
+async function get_top_stories(limit = 10) {
   const response = await fetch(
     "https://hacker-news.firebaseio.com/v0/topstories.json",
   );
@@ -69,7 +69,7 @@ async function get_top_stories(limit: number = 10) {
   return stories;
 }
 
-async function get_story(id: number) {
+async function get_story(id) {
   const response = await fetch(
     `https://hacker-news.firebaseio.com/v0/item/${id}.json`,
   );
@@ -80,7 +80,7 @@ async function get_story(id: number) {
   };
 }
 
-async function get_story_with_comments(id: number) {
+async function get_story_with_comments(id) {
   const response = await fetch(
     `https://hacker-news.firebaseio.com/v0/item/${id}.json`,
   );
@@ -103,14 +103,14 @@ async function summarize_top_story() {
   return await get_story_with_comments(topStory[0].id);
 }
 
-export async function runFunction(name: string, args: any) {
+export async function runFunction(name, args) {
   switch (name) {
     case "get_top_stories":
-      return await get_top_stories();
+      return await get_top_stories(args.limit);
     case "get_story":
-      return await get_story(args["id"]);
+      return await get_story(args.id);
     case "get_story_with_comments":
-      return await get_story_with_comments(args["id"]);
+      return await get_story_with_comments(args.id);
     case "summarize_top_story":
       return await summarize_top_story();
     default:
