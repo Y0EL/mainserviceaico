@@ -1,6 +1,17 @@
 import { CompletionCreateParams } from "openai/resources/chat/index";
 
-export const functions: CompletionCreateParams.Function[] = [
+// Assuming FunctionParams is the structure of a function in CompletionCreateParams
+interface FunctionParams {
+    name: string;
+    description: string;
+    parameters: {
+        type: string;
+        properties: Record<string, any>;
+        required?: string[];
+    };
+}
+
+export const functions: FunctionParams[] = [
   {
     name: "get_top_stories",
     description:

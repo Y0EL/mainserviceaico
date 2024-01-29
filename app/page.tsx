@@ -11,7 +11,7 @@ import remarkGfm from "remark-gfm";
 import Textarea from "react-textarea-autosize";
 import { toast } from "sonner";
 
-const examples = [
+const examples: string[] = [
 ];
 
 export default function Chat() {
