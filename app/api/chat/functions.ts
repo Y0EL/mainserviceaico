@@ -61,10 +61,16 @@ async function summarize_top_story(): Promise<FunctionResponse> {
 export async function runFunction(name: string, args: FunctionParameter): Promise<FunctionResponse> {
   switch (name) {
     case "get_top_stories":
-      return get_top_stories(args.limit);
+      return get_top_stories(args.limit || 10); // Provide a default value if args.limit is undefined
     case "get_story":
+      if (typeof args.id !== 'number') {
+        throw new Error("Invalid or missing 'id' parameter for get_story");
+      }
       return get_story(args.id);
     case "get_story_with_comments":
+      if (typeof args.id !== 'number') {
+        throw new Error("Invalid or missing 'id' parameter for get_story_with_comments");
+      }
       return get_story_with_comments(args.id);
     case "summarize_top_story":
       return summarize_top_story();
@@ -72,3 +78,4 @@ export async function runFunction(name: string, args: FunctionParameter): Promis
       throw new Error(`Function ${name} is not implemented`);
   }
 }
+
