@@ -59,7 +59,7 @@ export async function POST(req: Request) {
     function_call: "auto",
   });
 
-  const stream = OpenAIStream(initialResponse, {
+  const stream = OpenAIStream(initialResponse as unknown as AsyncIterable<ChatCompletionChunk>, {
     experimental_onFunctionCall: async (
       { name, arguments: args },
       createFunctionCallMessages,
